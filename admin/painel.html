@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel — Vandalize</title>
+  <link rel="stylesheet" href="../src/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="admin-body">
+
+<!-- AUTH GUARD -->
+<script>
+  if (localStorage.getItem('vandalize_admin') !== 'true') {
+    window.location.href = 'index.html';
+  }
+</script>
+
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <a href="../index.html" class="admin-sidebar-logo">VANDALIZE</a>
+
+    <div class="admin-nav-item active" data-tab="dashboard">
+      <span class="icon">📊</span> Dashboard
+    </div>
+    <div class="admin-nav-item" data-tab="articles">
+      <span class="icon">📰</span> Matérias
+    </div>
+    <div class="admin-nav-item" data-tab="new-article">
+      <span class="icon">✏️</span> Nova Matéria
+    </div>
+    <div class="admin-nav-item" data-tab="images">
+      <span class="icon">🖼️</span> Imagens
+    </div>
+    <div class="admin-nav-item" data-tab="subscribers">
+      <span class="icon">📧</span> Assinantes
+    </div>
+    <div class="admin-nav-item" style="margin-top:auto;padding-top:2rem;" id="logoutBtn">
+      <span class="icon">🚪</span> Sair
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+
+    <!-- ── DASHBOARD ── -->
+    <section class="panel-section active" id="tab-dashboard">
+      <div class="admin-topbar">
+        <h1>Dashboard</h1>
+        <button class="btn btn-primary" onclick="switchTab('new-article')">+ Nova Matéria</button>
+      </div>
+
+      <div class="stats-row" id="statsRow">
+        <!-- filled by JS -->
+      </div>
+
+      <div class="admin-card">
+        <p class="admin-card-title">MATÉRIAS RECENTES</p>
+        <table class="admin-table" id="dashRecentTable">
+          <thead>
+            <tr>
+              <th>TÍTULO</th>
+              <th>CATEGORIA</th>
+              <th>AUTOR</th>
+              <th>STATUS</th>
+              <th>DATA</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="dashRecentBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── MATÉRIAS ── -->
+    <section class="panel-section" id="tab-articles">
+      <div class="admin-topbar">
+        <h1>Matérias</h1>
+        <div style="display:flex;gap:1rem;align-items:center;">
+          <select class="form-select" id="filterCat" style="width:160px;">
+            <option value="">Todas categorias</option>
+            <option value="musica">Música</option>
+            <option value="carnaval">Carnaval</option>
+            <option value="capoeira">Capoeira</option>
+            <option value="noite">Noite</option>
+            <option value="investigacao">Investigação</option>
+          </select>
+          <button class="btn btn-primary" onclick="switchTab('new-article')">+ Nova Matéria</button>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>TÍTULO</th>
+              <th>CATEGORIA</th>
+              <th>AUTOR</th>
+              <th>STATUS</th>
+              <th>DATA</th>
+              <th>AÇÕES</th>
+            </tr>
+          </thead>
+          <tbody id="articlesTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── NOVA MATÉRIA / EDIÇÃO ── -->
+    <section class="panel-section" id="tab-new-article">
+      <div class="admin-topbar">
+        <h1 id="formTitle">Nova Matéria</h1>
+        <div style="display:flex;gap:1rem;">
+          <button class="btn btn-secondary" id="saveDraftBtn">Salvar Rascunho</button>
+          <button class="btn btn-primary" id="publishBtn">Publicar →</button>
+        </div>
+      </div>
+
+      <input type="hidden" id="editingId" value="" />
+
+      <div class="admin-card">
+        <p class="admin-card-title">INFORMAÇÕES DA MATÉRIA</p>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label class="form-label">TÍTULO</label>
+            <input type="text" id="fTitle" class="form-input" placeholder="Título da matéria" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">CATEGORIA</label>
+            <select id="fCategory" class="form-select">
+              <option value="musica">Música</option>
+              <option value="carnaval">Carnaval</option>
+              <option value="capoeira">Capoeira</option>
+              <option value="noite">Noite</option>
+              <option value="investigacao">Investigação</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">AUTOR</label>
+            <input type="text" id="fAuthor" class="form-input" placeholder="Nome do autor" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">TEMPO DE LEITURA</label>
+            <input type="text" id="fReadTime" class="form-input" placeholder="Ex: 8 min" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">DATA DE PUBLICAÇÃO</label>
+            <input type="date" id="fDate" class="form-input" />
+          </div>
+          <div class="form-group full">
+            <label class="form-label">RESUMO / SUBTÍTULO</label>
+            <textarea id="fExcerpt" class="form-textarea" placeholder="Breve descrição da matéria..." style="min-height:80px;"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <p class="admin-card-title">IMAGEM DE CAPA</p>
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label class="form-label">URL DA IMAGEM</label>
+          <input type="text" id="fImage" class="form-input" placeholder="https://... ou selecione da biblioteca abaixo" />
+        </div>
+        <div id="fImagePreviewWrap" style="display:none;margin-bottom:1rem;">
+          <img id="fImagePreview" src="" alt="Preview" style="max-height:200px;object-fit:cover;width:100%;" />
+        </div>
+        <p class="form-label" style="margin-bottom:0.75rem;">OU ESCOLHA DA BIBLIOTECA</p>
+        <div class="images-grid" id="coverImagePicker">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <p class="admin-card-title">CONTEÚDO</p>
+        <div class="editor-toolbar">
+          <button class="editor-btn" onclick="execCmd('bold')"><b>B</b></button>
+          <button class="editor-btn" onclick="execCmd('italic')"><i>I</i></button>
+          <button class="editor-btn" onclick="execCmd('underline')"><u>U</u></button>
+          <button class="editor-btn" onclick="execCmd('insertParagraph')">¶</button>
+          <button class="editor-btn" onclick="execCmd('formatBlock', 'H2')">H2</button>
+          <button class="editor-btn" onclick="execCmd('formatBlock', 'H3')">H3</button>
+          <button class="editor-btn" onclick="execCmd('insertUnorderedList')">• Lista</button>
+          <button class="editor-btn" onclick="execCmd('createLink')">🔗</button>
+          <button class="editor-btn" onclick="clearFormat()">Limpar</button>
+        </div>
+        <div class="editor-area" id="fBody" contenteditable="true"
+             placeholder="Escreva o conteúdo da matéria aqui..."></div>
+      </div>
+    </section>
+
+    <!-- ── IMAGENS ── -->
+    <section class="panel-section" id="tab-images">
+      <div class="admin-topbar">
+        <h1>Biblioteca de Imagens</h1>
+      </div>
+
+      <div class="admin-card">
+        <p class="admin-card-title">FAZER UPLOAD</p>
+        <div class="upload-zone" id="dropZone">
+          <input type="file" id="imgUpload" accept="image/*" multiple />
+          <div class="upload-zone-icon">📁</div>
+          <p class="upload-zone-text">Arraste imagens ou <span>clique para selecionar</span></p>
+          <p class="upload-zone-text" style="font-size:0.75rem;margin-top:0.3rem;color:#555;">PNG, JPG, WEBP • Máx. 5MB por imagem</p>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <p class="admin-card-title" style="margin-bottom:0;">IMAGENS SALVAS (<span id="imgCount">0</span>)</p>
+          <button class="btn btn-danger" id="deleteSelectedBtn" style="display:none;">🗑 Excluir Selecionadas</button>
+        </div>
+        <div class="images-grid" id="imagesLibrary">
+          <!-- filled by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ── ASSINANTES ── -->
+    <section class="panel-section" id="tab-subscribers">
+      <div class="admin-topbar">
+        <h1>Assinantes Newsletter</h1>
+        <button class="btn btn-secondary" id="exportSubsBtn">⬇ Exportar CSV</button>
+      </div>
+
+      <div class="admin-card">
+        <p class="admin-card-title">LISTA DE E-MAILS (<span id="subsCount">0</span>)</p>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>E-MAIL</th>
+              <th>AÇÕES</th>
+            </tr>
+          </thead>
+          <tbody id="subsTableBody"></tbody>
+        </table>
+        <p id="subsEmpty" style="color:#555;font-size:0.88rem;padding:1rem 0;display:none;">Nenhum assinante ainda.</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="admin.js"></script>
+</body>
+</html>
